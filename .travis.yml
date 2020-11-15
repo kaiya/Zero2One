@@ -1,0 +1,4 @@
+language: objective-c
+xcode_project: Zero2One.xcodeproj # path to your xcodeproj folder
+xcode_scheme: Zero2One 
+xcode_destination: platform=iOS Simulator,OS=9.3,name=iPhone 5s
