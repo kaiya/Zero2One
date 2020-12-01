@@ -34,7 +34,7 @@
         MFMailComposeViewController *composer = [[MFMailComposeViewController alloc]init];
         [composer setMailComposeDelegate:self];
         if ([MFMailComposeViewController canSendMail]) {
-            NSArray *toRecipients = [NSArray arrayWithObjects:@"KevinHsiun@gmail.com", nil];
+            NSArray *toRecipients = [NSArray arrayWithObjects:@"xiongkaiya@gmail.com", nil];
             //set the composer
             [composer setSubject:@"Crash Report"];
             [composer setToRecipients:toRecipients];

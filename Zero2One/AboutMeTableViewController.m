@@ -74,7 +74,7 @@
         [composer setMailComposeDelegate:self];
         if ([MFMailComposeViewController canSendMail]) {
             
-            NSArray *toRecipients = [NSArray arrayWithObjects:@"KevinHsiun@gmail.com", nil];
+            NSArray *toRecipients = [NSArray arrayWithObjects:@"xiongkaiya@gmail.com", nil];
             //set mailcpmposer
             [composer setSubject:@"Feedback"];
             [composer setToRecipients:toRecipients];
@@ -106,67 +106,94 @@
         
         NSUserDefaults *UserDefault = [NSUserDefaults standardUserDefaults];
         
-        NSURL *url = [NSURL URLWithString:@"http://www.azfs.com.cn/Login/changeStatus.php"];
-        NSString *post = [[NSString alloc]initWithFormat:@"username=%@",[UserDefault stringForKey:@"username"]];
-        NSData *postData = [post dataUsingEncoding:NSUTF8StringEncoding];
-        NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:url];
-        [req setHTTPMethod:@"POST"];
-        [req setHTTPBody:postData];
-        [req setTimeoutInterval:10.0];
-        
-        NSOperationQueue *myQueue = [NSOperationQueue mainQueue];
-        [NSURLConnection sendAsynchronousRequest:req queue:myQueue completionHandler:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
-            
-            if (connectionError) {
-                
-                NSLog(@"Http error:%@%ld",connectionError.localizedDescription,(long)connectionError.code);
-                
-            }else{
-                
-                NSInteger responseCode = [(NSHTTPURLResponse *)response statusCode];
-                NSString *responseString = [[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding];
-                NSLog(@"Http Response Code :%ld",(long)responseCode);
-                NSLog(@"http Response String: %@",responseString);
-                
-                if ([responseString isEqualToString:@"success"]) {
-                    
-                    NSLog(@"logout success ");
-                    //pick username and email, and then remove them from  userdefault
-                    NSUserDefaults *userDefault = [NSUserDefaults standardUserDefaults];
-                    [userDefault removeObjectForKey:@"username"];
-                    [userDefault removeObjectForKey:@"email"];
-                    [UserDefault removeObjectForKey:@"name"];
-                    [UserDefault removeObjectForKey:@"contacts"];
-                    //sync with local disk to storge it
-                    [userDefault synchronize];
-                    //remove user's image
-//                    NSArray *documentPaths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-//                    NSString *ourDocumentPath = [documentPaths objectAtIndex:0];
-//                    NSString *imagePath = [ourDocumentPath stringByAppendingString:@"/myGravatar.png"];
-//                    if ([[NSFileManager defaultManager]removeItemAtPath:imagePath error:nil]) {
-//                        NSLog(@"remove user's image success");
-//                       }else{
-//                        NSLog(@"remove user's image failed");
-//                    }
-                    [SVProgressHUD showSuccessWithStatus:@"success logout"];
-                    
-                    UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"Main" bundle:[NSBundle mainBundle]];
-                    //get the view that users will go after logout
-                    id view = [storyboard instantiateViewControllerWithIdentifier:@"LoginView"];
-                    //present the login view modally
-                    [self presentViewController:view animated:YES completion:^{
-                    }];
-                    
-                    
-                }else{
-                    
-                    NSLog(@"logout failed ");
-                    [SVProgressHUD showErrorWithStatus:@"change failed"];
-                }
-            }
-            
-        }];
+//        NSURL *url = [NSURL URLWithString:@"http://www.azfs.com.cn/Login/changeStatus.php"];
+//        NSString *post = [[NSString alloc]initWithFormat:@"username=%@",[UserDefault stringForKey:@"username"]];
+//        NSData *postData = [post dataUsingEncoding:NSUTF8StringEncoding];
+//        NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:url];
+//        [req setHTTPMethod:@"POST"];
+//        [req setHTTPBody:postData];
+//        [req setTimeoutInterval:10.0];
+//
+//        NSOperationQueue *myQueue = [NSOperationQueue mainQueue];
+//        [NSURLConnection sendAsynchronousRequest:req queue:myQueue completionHandler:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
+//
+//            if (connectionError) {
+//
+//                NSLog(@"Http error:%@%ld",connectionError.localizedDescription,(long)connectionError.code);
+//
+//            }else{
+//
+//                NSInteger responseCode = [(NSHTTPURLResponse *)response statusCode];
+//                NSString *responseString = [[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding];
+//                NSLog(@"Http Response Code :%ld",(long)responseCode);
+//                NSLog(@"http Response String: %@",responseString);
+//
+//                if ([responseString isEqualToString:@"success"]) {
+//
+//                    NSLog(@"logout success ");
+//                    //pick username and email, and then remove them from  userdefault
+//                    NSUserDefaults *userDefault = [NSUserDefaults standardUserDefaults];
+//                    [userDefault removeObjectForKey:@"username"];
+//                    [userDefault removeObjectForKey:@"email"];
+//                    [UserDefault removeObjectForKey:@"name"];
+//                    [UserDefault removeObjectForKey:@"contacts"];
+//                    //sync with local disk to storge it
+//                    [userDefault synchronize];
+//                    //remove user's image
+////                    NSArray *documentPaths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+////                    NSString *ourDocumentPath = [documentPaths objectAtIndex:0];
+////                    NSString *imagePath = [ourDocumentPath stringByAppendingString:@"/myGravatar.png"];
+////                    if ([[NSFileManager defaultManager]removeItemAtPath:imagePath error:nil]) {
+////                        NSLog(@"remove user's image success");
+////                       }else{
+////                        NSLog(@"remove user's image failed");
+////                    }
+//                    [SVProgressHUD showSuccessWithStatus:@"success logout"];
+//
+//                    UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"Main" bundle:[NSBundle mainBundle]];
+//                    //get the view that users will go after logout
+//                    id view = [storyboard instantiateViewControllerWithIdentifier:@"LoginView"];
+//                    //present the login view modally
+//                    [self presentViewController:view animated:YES completion:^{
+//                    }];
+//
+//
+//                }else{
+//
+//                    NSLog(@"logout failed ");
+//                    [SVProgressHUD showErrorWithStatus:@"change failed"];
+//                }
+//            }
+//
+//        }];
 
+        
+        NSLog(@"logout success ");
+        //pick username and email, and then remove them from  userdefault
+        NSUserDefaults *userDefault = [NSUserDefaults standardUserDefaults];
+        [userDefault removeObjectForKey:@"username"];
+        [userDefault removeObjectForKey:@"email"];
+        [UserDefault removeObjectForKey:@"name"];
+        [UserDefault removeObjectForKey:@"contacts"];
+        //sync with local disk to storge it
+        [userDefault synchronize];
+        //remove user's image
+        //                    NSArray *documentPaths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+        //                    NSString *ourDocumentPath = [documentPaths objectAtIndex:0];
+        //                    NSString *imagePath = [ourDocumentPath stringByAppendingString:@"/myGravatar.png"];
+        //                    if ([[NSFileManager defaultManager]removeItemAtPath:imagePath error:nil]) {
+        //                        NSLog(@"remove user's image success");
+        //                       }else{
+        //                        NSLog(@"remove user's image failed");
+        //                    }
+        [SVProgressHUD showSuccessWithStatus:@"success logout"];
+        
+        UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"Main" bundle:[NSBundle mainBundle]];
+        //get the view that users will go after logout
+        id view = [storyboard instantiateViewControllerWithIdentifier:@"LoginView"];
+        //present the login view modally
+        [self presentViewController:view animated:YES completion:^{
+        }];
     }
 }
 

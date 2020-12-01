@@ -23,7 +23,7 @@
 
 - (IBAction)openGithub:(UIButton *)sender {
     
-    NSString *url = @"https://github.com/KYawn";
+    NSString *url = @"https://github.com/Kaiya";
     [[UIApplication sharedApplication] openURL:[NSURL URLWithString:url]];
 }
 

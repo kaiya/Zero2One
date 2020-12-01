@@ -55,21 +55,27 @@
     
     //    [SVProgressHUD showWithStatus:@"logining" maskType:SVProgressHUDMaskTypeClear];
     //    [SVProgressHUD setBackgroundColor:[UIColor grayColor]];
-    NSURL *url = [NSURL URLWithString:@"http://www.azfs.com.cn/Login/iossigntest.php"];
-    NSString *post = [[NSString alloc]initWithFormat:@"username=%@&password=%@",_phoneNumberTextField.text,_passwordTextField.text ];
-    NSData *postData = [post dataUsingEncoding:NSUTF8StringEncoding];
-    NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:url];
-    [req setHTTPMethod:@"POST"];
-    [req setHTTPBody:postData];
-    [req setTimeoutInterval:10.0];
     
-    NSOperationQueue *myQueue = [NSOperationQueue mainQueue];
-    [NSURLConnection sendAsynchronousRequest:req queue:myQueue completionHandler:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
-        
+    NSDictionary *headers = @{ @"x-lc-id": @"GBlGr53Qb9gnMHzA8Oh3SqN2-gzGzoHsz",
+                               @"x-lc-key": @"4Y75VJPn7m5eWQayGnT6qFFK",
+                               @"content-type": @"application/json"};
+    NSDictionary *parameters = @{ @"username": _phoneNumberTextField.text,
+                                  @"password": _passwordTextField.text};
+    
+    NSData *postData = [NSJSONSerialization dataWithJSONObject:parameters options:0 error:nil];
+    
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"https://api.azfs.com.cn/1.1/login"]
+                                                           cachePolicy:NSURLRequestUseProtocolCachePolicy
+                                                       timeoutInterval:10.0];
+    [request setHTTPMethod:@"POST"];
+    [request setAllHTTPHeaderFields:headers];
+    [request setHTTPBody:postData];
+    
+    
+    NSOperationQueue *myQueue = [NSOperationQueue currentQueue];
+    [NSURLConnection sendAsynchronousRequest:request queue:myQueue completionHandler:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
         if (connectionError) {
-            
             NSLog(@"Http error:%@%ld",connectionError.localizedDescription,(long)connectionError.code);
-            
         }else{
             
             [SVProgressHUD dismiss];
@@ -77,23 +83,21 @@
             NSString *responseString = [[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding];
             NSLog(@"Http Response Code :%ld",(long)responseCode);
             NSLog(@"http Response String: %@",responseString);
+            NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:NSUTF8StringEncoding error:nil];
+            NSNumber *returnCodeNumber = [json valueForKey:@"code"];
+            NSInteger returnCode = [returnCodeNumber integerValue];
+            NSString *sessionToken = [json valueForKey:@"sessionToken"];
+            if (responseCode == 200 && sessionToken != nil) {
             
-            if ([responseString isEqualToString:@"failed"]) {
-                
-                NSLog(@"login failed ");
-                [self shakeAnimationForView:_phoneNumberTextField];
-                [self  shakeAnimationForView:_passwordTextField];
-                
-                [SVProgressHUD showErrorWithStatus:@"username or password incorrect"];
-                
-                
-            }else{
-                
-                NSLog(@"login success ");
+                NSLog(@"login success, sessionToken:%@", sessionToken);
+                NSString *userObjectId = [json valueForKey:@"objectId"];
+                NSString *userName = [json valueForKey:@"username"];
                 // login success and store the username via userdefault
                 NSUserDefaults *UserDefault = [NSUserDefaults standardUserDefaults];
                 [UserDefault setObject:_phoneNumberTextField.text forKey:@"username"];
-                [UserDefault setObject:responseString forKey:@"name"];
+                [UserDefault setObject:userName forKey:@"name"]; //for what?
+                [UserDefault setObject:sessionToken forKey:@"sessionToken"];
+                [UserDefault setObject:userObjectId forKey:@"userObjectId"];
                 [UserDefault synchronize];
                 //go to the main view after login successfully
                 UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"Main" bundle:[NSBundle mainBundle]];
@@ -101,9 +105,19 @@
                 [self presentViewController:mainViewController animated:YES completion:^{
                 }];
                 
+            }else if(returnCode == 210 || returnCode == 211){
+
+                NSLog(@"username or password incorrect ");
+                [self shakeAnimationForView:_phoneNumberTextField];
+                [self  shakeAnimationForView:_passwordTextField];
+
+                [SVProgressHUD showErrorWithStatus:@"username or password incorrect"];
+            }else{
+                NSLog(@"login failed");
+                [SVProgressHUD showErrorWithStatus:responseString];
             }
+            
         }
-        
     }];
     
 }

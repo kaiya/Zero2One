@@ -59,21 +59,28 @@
     [SVProgressHUD showWithStatus:@"Signing up" maskType:SVProgressHUDMaskTypeGradient];
     [SVProgressHUD setBackgroundColor:[UIColor grayColor]];
     
-    NSURL *url = [NSURL URLWithString:@"http://www.azfs.com.cn/Login/iossignup.php"];
-    NSString *post = [[NSString alloc]initWithFormat:@"username=%@&email=%@&password=%@&password-confirm=%@",_phoneNumberTextField.text,@"KevinHsiun@yahoo.com",_passwordTextField.text,_passwordTextField.text];
-    NSData *postData = [post dataUsingEncoding:NSUTF8StringEncoding];
-    NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:url];
-    [req setHTTPMethod:@"POST"];
-    [req setHTTPBody:postData];
-    [req setTimeoutInterval:10.0];
     
-    NSOperationQueue *myQueue = [NSOperationQueue mainQueue];
-    [NSURLConnection sendAsynchronousRequest:req queue:myQueue completionHandler:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
-        
+    NSDictionary *headers = @{ @"x-lc-id": @"GBlGr53Qb9gnMHzA8Oh3SqN2-gzGzoHsz",
+                               @"x-lc-key": @"4Y75VJPn7m5eWQayGnT6qFFK",
+                               @"content-type": @"application/json"};
+    NSDictionary *parameters = @{ @"username": _phoneNumberTextField.text,
+                                  @"password": _passwordTextField.text,
+                                  @"phone": _phoneNumberTextField.text};
+    
+    NSData *postData = [NSJSONSerialization dataWithJSONObject:parameters options:0 error:nil];
+    
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"https://api.azfs.com.cn/1.1/users"]
+                                                           cachePolicy:NSURLRequestUseProtocolCachePolicy
+                                                       timeoutInterval:10.0];
+    [request setHTTPMethod:@"POST"];
+    [request setAllHTTPHeaderFields:headers];
+    [request setHTTPBody:postData];
+    
+    
+    NSOperationQueue *myQueue = [NSOperationQueue currentQueue];
+    [NSURLConnection sendAsynchronousRequest:request queue:myQueue completionHandler:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
         if (connectionError) {
-            
             NSLog(@"Http error:%@%ld",connectionError.localizedDescription,(long)connectionError.code);
-            
         }else{
             
             [SVProgressHUD dismiss];
@@ -81,19 +88,23 @@
             NSString *responseString = [[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding];
             NSLog(@"Http Response Code :%ld",(long)responseCode);
             NSLog(@"http Response String: %@",responseString);
-            if ([responseString isEqualToString:@"success"]) {
-                
+            if (responseCode==201) {
                 NSLog(@"sign up success");
+                NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:NSUTF8StringEncoding error:nil];
+                NSString *sessionToken = [json valueForKey:@"sessionToken"];
+                NSLog(@"SessionToken:%@", sessionToken); //todo store in user defaults.
                 [self dismissViewControllerAnimated:YES completion:nil];
                 [SVProgressHUD showSuccessWithStatus:@"Sign up success"];
-                
             }else{
-                
                 NSLog(@"sign up failed");
                 [SVProgressHUD showErrorWithStatus:responseString];
             }
+            
         }
-    }];
+            }];
+    
+    
+    
 }
 
 - (void)didReceiveMemoryWarning {

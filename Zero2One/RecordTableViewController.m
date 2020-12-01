@@ -35,8 +35,8 @@
         
     }else{
         
-        [self listUsers];
-        [self listUserName];
+//        [self listUsers];
+//        [self listUserName];
     }
     NSString *contacts = [UserDefault valueForKey:@"contacts"];
     _contactsArray = [contacts  componentsSeparatedByString:@","];
@@ -114,34 +114,72 @@
 
 - (void) listUsers{
     
-    NSURL *url = [NSURL URLWithString:@"http://www.azfs.com.cn/Login/listUsers.php"];
-    NSString *post = [[NSString alloc]initWithFormat:@""];
-    NSData *postData = [post dataUsingEncoding:NSUTF8StringEncoding];
-    NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:url];
-    [req setHTTPMethod:@"POST"];
-    [req setHTTPBody:postData];
-    [req setTimeoutInterval:10.0];
-    
-    //异步获取网络数据
-    NSOperationQueue *myQueue = [NSOperationQueue mainQueue];
-    [NSURLConnection sendAsynchronousRequest:req queue:myQueue completionHandler:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
+//    NSURL *url = [NSURL URLWithString:@"http://www.azfs.com.cn/Login/listUsers.php"];
+//    NSString *post = [[NSString alloc]initWithFormat:@""];
+//    NSData *postData = [post dataUsingEncoding:NSUTF8StringEncoding];
+//    NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:url];
+//    [req setHTTPMethod:@"POST"];
+//    [req setHTTPBody:postData];
+//    [req setTimeoutInterval:10.0];
+//
+//    //异步获取网络数据
+//    NSOperationQueue *myQueue = [NSOperationQueue mainQueue];
+//    [NSURLConnection sendAsynchronousRequest:req queue:myQueue completionHandler:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
+//
+//        if (connectionError) {
+//
+//            NSLog(@"Http error:%@%ld",connectionError.localizedDescription,(long)connectionError.code);
+//
+//        }else{
+//
+//            NSInteger responseCode = [(NSHTTPURLResponse *)response statusCode];
+//            NSString *responseString = [[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding];
+//            NSLog(@"Http Response Code :%ld",(long)responseCode);
+//            NSLog(@"http Response : %@",responseString);
+//            NSUserDefaults *UserDefault = [NSUserDefaults standardUserDefaults];
+//            [UserDefault setObject:responseString forKey:@"contacts"];
+//            [UserDefault synchronize];
+//
+//        }
+//
+//    }];
 
+    NSDictionary *headers = @{ @"x-lc-id": @"GBlGr53Qb9gnMHzA8Oh3SqN2-gzGzoHsz",
+                               @"x-lc-key": @"4Y75VJPn7m5eWQayGnT6qFFK",
+                               @"content-type": @"application/json"};
+    
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"https://api.azfs.com.cn/1.1/users"]
+                                                           cachePolicy:NSURLRequestUseProtocolCachePolicy
+                                                       timeoutInterval:10.0];
+    [request setHTTPMethod:@"GET"];
+    [request setAllHTTPHeaderFields:headers];
+    
+    NSOperationQueue *myQueue = [NSOperationQueue currentQueue];
+    [NSURLConnection sendAsynchronousRequest:request queue:myQueue completionHandler:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
         if (connectionError) {
-            
             NSLog(@"Http error:%@%ld",connectionError.localizedDescription,(long)connectionError.code);
-            
         }else{
-            
+  
             NSInteger responseCode = [(NSHTTPURLResponse *)response statusCode];
             NSString *responseString = [[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding];
             NSLog(@"Http Response Code :%ld",(long)responseCode);
             NSLog(@"http Response : %@",responseString);
+            NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:NSUTF8StringEncoding error:nil];
+            NSArray *results = [json objectForKey:@"results"];
+            NSMutableArray *usernames = [NSMutableArray array];
+            for(NSString *contact in results){
+                NSData *data = [contact dataUsingEncoding:NSUTF8StringEncoding];
+                NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+                NSString *username = [json valueForKey:@"username"];
+                [usernames addObject:username];
+            }
+            NSLog(@"usernames:%@", usernames);
             NSUserDefaults *UserDefault = [NSUserDefaults standardUserDefaults];
-            [UserDefault setObject:responseString forKey:@"contacts"];
+            [UserDefault setObject:results forKey:@"contacts"];
+            [UserDefault setObject:usernames forKey:@"contactsUserName"];
             [UserDefault synchronize];
-            
+    
         }
-        
     }];
     
 }
@@ -152,35 +190,35 @@
     
     
     
-    NSURL *url = [NSURL URLWithString:@"http://www.azfs.com.cn/Login/listUserName.php"];
-    NSString *post = [[NSString alloc]initWithFormat:@""];
-    NSData *postData = [post dataUsingEncoding:NSUTF8StringEncoding];
-    NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:url];
-    [req setHTTPMethod:@"POST"];
-    [req setHTTPBody:postData];
-    [req setTimeoutInterval:10.0];
-    
-    //异步获取网络数据
-    
-    NSOperationQueue *myQueue = [NSOperationQueue mainQueue];
-    [NSURLConnection sendAsynchronousRequest:req queue:myQueue completionHandler:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
-
-        if (connectionError) {
-            
-            NSLog(@"Http error:%@%ld",connectionError.localizedDescription,(long)connectionError.code);
-            
-        }else{
-            
-            NSInteger responseCode = [(NSHTTPURLResponse *)response statusCode];
-            NSString *responseString = [[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding];
-            NSLog(@"Http Response Code :%ld",(long)responseCode);
-            NSLog(@"http Response  username : %@",responseString);
-            NSUserDefaults *UserDefault = [NSUserDefaults standardUserDefaults];
-            [UserDefault setObject:responseString forKey:@"contactsUserName"];
-            [UserDefault synchronize];
-        }
-        
-    }];
+//    NSURL *url = [NSURL URLWithString:@"http://www.azfs.com.cn/Login/listUserName.php"];
+//    NSString *post = [[NSString alloc]initWithFormat:@""];
+//    NSData *postData = [post dataUsingEncoding:NSUTF8StringEncoding];
+//    NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:url];
+//    [req setHTTPMethod:@"POST"];
+//    [req setHTTPBody:postData];
+//    [req setTimeoutInterval:10.0];
+//
+//    //异步获取网络数据
+//
+//    NSOperationQueue *myQueue = [NSOperationQueue mainQueue];
+//    [NSURLConnection sendAsynchronousRequest:req queue:myQueue completionHandler:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
+//
+//        if (connectionError) {
+//
+//            NSLog(@"Http error:%@%ld",connectionError.localizedDescription,(long)connectionError.code);
+//
+//        }else{
+//
+//            NSInteger responseCode = [(NSHTTPURLResponse *)response statusCode];
+//            NSString *responseString = [[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding];
+//            NSLog(@"Http Response Code :%ld",(long)responseCode);
+//            NSLog(@"http Response  username : %@",responseString);
+//            NSUserDefaults *UserDefault = [NSUserDefaults standardUserDefaults];
+//            [UserDefault setObject:responseString forKey:@"contactsUserName"];
+//            [UserDefault synchronize];
+//        }
+//
+//    }];
     
 }
 

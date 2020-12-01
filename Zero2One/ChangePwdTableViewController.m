@@ -35,21 +35,70 @@
     
     [SVProgressHUD showWithStatus:@"changing" maskType:SVProgressHUDMaskTypeGradient];
     [SVProgressHUD setBackgroundColor:[UIColor grayColor]];
-    NSURL *url = [NSURL URLWithString:@"http://www.azfs.com.cn/Login/changePwd.php"];
-    NSString *post = [[NSString alloc]initWithFormat:@"username=%@&password=%@",[UserDefault stringForKey:@"username"],_changePwdTextField.text ];
-    NSData *postData = [post dataUsingEncoding:NSUTF8StringEncoding];
-    NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:url];
-    [req setHTTPMethod:@"POST"];
-    [req setHTTPBody:postData];
-    [req setTimeoutInterval:10.0];
     
-    NSOperationQueue *myQueue = [NSOperationQueue mainQueue];
-    [NSURLConnection sendAsynchronousRequest:req queue:myQueue completionHandler:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
-        
+//    NSURL *url = [NSURL URLWithString:@"http://www.azfs.com.cn/Login/changePwd.php"];
+//    NSString *post = [[NSString alloc]initWithFormat:@"username=%@&password=%@",[UserDefault stringForKey:@"username"],_changePwdTextField.text ];
+//    NSData *postData = [post dataUsingEncoding:NSUTF8StringEncoding];
+//    NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:url];
+//    [req setHTTPMethod:@"POST"];
+//    [req setHTTPBody:postData];
+//    [req setTimeoutInterval:10.0];
+//
+//    NSOperationQueue *myQueue = [NSOperationQueue mainQueue];
+//    [NSURLConnection sendAsynchronousRequest:req queue:myQueue completionHandler:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
+//
+//        if (connectionError) {
+//
+//            NSLog(@"Http error:%@%ld",connectionError.localizedDescription,(long)connectionError.code);
+//
+//        }else{
+//
+//            [SVProgressHUD dismiss];
+//            NSInteger responseCode = [(NSHTTPURLResponse *)response statusCode];
+//            NSString *responseString = [[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding];
+//            NSLog(@"Http Response Code :%ld",(long)responseCode);
+//            NSLog(@"http Response String: %@",responseString);
+//
+//            if ([responseString isEqualToString:@"success"]) {
+//
+//                NSLog(@"change success ");
+//                [SVProgressHUD showSuccessWithStatus:@"change success, please relogin"];
+//                UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"Main" bundle:[NSBundle mainBundle]];
+//                id mainViewController = [storyboard instantiateViewControllerWithIdentifier:@"LoginView"];
+//                [self presentViewController:mainViewController animated:YES completion:^{
+//                }];
+//
+//            }else{
+//
+//                NSLog(@"change failed ");
+//                [SVProgressHUD showErrorWithStatus:@"change failed"];
+//            }
+//        }
+//
+//    }];
+    
+    NSString *userObejctId = [UserDefault stringForKey:@"userObjectId"];
+    NSString *url = [NSString stringWithFormat:@"https://api.azfs.com.cn/1.1/users/%@", userObejctId];
+    NSDictionary *headers = @{ @"x-lc-id": @"GBlGr53Qb9gnMHzA8Oh3SqN2-gzGzoHsz",
+                               @"x-lc-key": @"4Y75VJPn7m5eWQayGnT6qFFK",
+                               @"content-type": @"application/json",
+                               @"X-LC-Session":[UserDefault stringForKey:@"sessionToken"],
+                               };
+    NSDictionary *parameters = @{ @"password": _changePwdTextField.text};
+    
+    NSData *putData = [NSJSONSerialization dataWithJSONObject:parameters options:0 error:nil];
+    
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:url]
+                                                           cachePolicy:NSURLRequestUseProtocolCachePolicy
+                                                       timeoutInterval:10.0];
+    [request setHTTPMethod:@"PUT"];
+    [request setAllHTTPHeaderFields:headers];
+    [request setHTTPBody:putData];
+    
+    NSOperationQueue *myQueue = [NSOperationQueue currentQueue];
+    [NSURLConnection sendAsynchronousRequest:request queue:myQueue completionHandler:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
         if (connectionError) {
-            
             NSLog(@"Http error:%@%ld",connectionError.localizedDescription,(long)connectionError.code);
-            
         }else{
             
             [SVProgressHUD dismiss];
@@ -57,8 +106,9 @@
             NSString *responseString = [[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding];
             NSLog(@"Http Response Code :%ld",(long)responseCode);
             NSLog(@"http Response String: %@",responseString);
-            
-            if ([responseString isEqualToString:@"success"]) {
+            NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:NSUTF8StringEncoding error:nil];
+            NSString *updatedAt = [json valueForKey:@"updatedAt"];
+            if (responseCode==200 && updatedAt != nil) {
                 
                 NSLog(@"change success ");
                 [SVProgressHUD showSuccessWithStatus:@"change success, please relogin"];
@@ -68,13 +118,14 @@
                 }];
                 
             }else{
-                
-                NSLog(@"change failed ");
-                [SVProgressHUD showErrorWithStatus:@"change failed"];
+                NSLog(@"Change name failed");
+                [SVProgressHUD showErrorWithStatus:responseString];
             }
+            
         }
-        
     }];
+    
+    
 }
 
 - (void)didReceiveMemoryWarning {
